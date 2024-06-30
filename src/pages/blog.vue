@@ -2,14 +2,14 @@
 import InfiniteLoading from "v3-infinite-loading";
 
 interface Post {
-  id: String,
-  uuid: String,
-  title: String,
-  slug: String,
-  content: String,
-  metadata: String,
-  created_at: String,
-  updated_at: String
+  id: string,
+  uuid: string,
+  title: string,
+  slug: string,
+  content: string,
+  metadata: string,
+  created_at: string,
+  updated_at: string
 }
 
 import axios from "axios";

@@ -1,15 +1,15 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { App } from "vue";
+import Cookie from 'js-cookie'
 
 export default {
   install: (app: App) => {
     const authStore = useAuthStore()
-    axios.defaults.baseURL = 'https://petshop-api.test'
+    axios.defaults.baseURL = 'http://localhost:8000'
     // Add axios interceptor for adding token to requests
     axios.interceptors.request.use(config => {
-      console.log('Adding token to request', authStore.token)
-      const token = authStore.token
+      const token = authStore.token || Cookie.get('jwt')
       if (token) {
         config.headers.Authorization = `Bearer ${token}`
       }

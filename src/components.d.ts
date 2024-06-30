@@ -13,5 +13,7 @@ declare module 'vue' {
     RegisterForm: typeof import('./components/RegisterForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserInfo: typeof import('./components/UserInfo.vue')['default']
+    UserOrderList: typeof import('./components/UserOrderList.vue')['default']
   }
 }
