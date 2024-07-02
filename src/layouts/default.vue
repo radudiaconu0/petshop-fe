@@ -21,7 +21,7 @@
       <v-btn variant="outlined" rounded>
         <v-icon left>mdi-cart</v-icon>
       </v-btn>
-      <LoginForm v-if="user"></LoginForm>
+      <LoginForm v-if="auth.user ==null"></LoginForm>
       <UserInfo v-else></UserInfo>
     </v-app-bar>
     <v-main>
@@ -37,10 +37,11 @@ import { useAuthStore } from "@/stores/auth";
 import axios from "axios";
 import UserInfo from "@/components/UserInfo.vue";
 import LoginForm from "@/components/LoginForm.vue";
-import { User } from "@/interfaces/user";
+import {User} from "@/interfaces/user";
 
 const auth = useAuthStore();
 const categories = ref([]);
+
 onMounted(async () => {
   try {
     const response = await axios.get('/api/v1/categories');

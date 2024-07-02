@@ -1,9 +1,64 @@
+<script lang="ts" setup>
+import {ref} from 'vue';
+import axios from "axios";
+import {useAuthStore} from "@/stores/auth";
+
+const dialog = ref(false);
+const orders = ref([]);
+
+const auth = useAuthStore();
+
+const headers = [
+  {text: 'Order UUID', value: 'uuid'},
+  {text: 'Status', value: 'status'},
+  {text: 'Download invoice', value: 'download'}
+];
+const fetchOrders = async () => {
+  try {
+    const response = await axios.get('/api/v1/user/orders', {
+      withCredentials: true,
+      headers: {
+        'Authorization': 'Bearer ' + useAuthStore().token
+      }
+    });
+    return response.data.data.data
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+onMounted(async () => {
+  orders.value = await fetchOrders();
+});
+
+const logout = () => {
+  auth.logout()
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'Open':
+      return 'blue';
+    case 'Pending payment':
+      return 'orange';
+    case 'Paid':
+      return 'green';
+    case 'Shipped':
+      return 'teal';
+    case 'Cancelled':
+      return 'grey';
+    default:
+      return 'grey';
+  }
+};
+</script>
+
 <template>
   <v-dialog v-model="dialog" max-width="1200px">
 
     <template v-slot:activator="{ props: activatorProps }">
-      <v-btn variant="outlined" class="ml-2"> Logout </v-btn>
-      <v-btn variant="outlined" class="ml-2" v-bind="activatorProps"> {{ user.first_name }} {{ user.last_name }}
+      <v-btn variant="outlined" class="ml-2" @click="logout"> Logout</v-btn>
+      <v-btn variant="outlined" class="ml-2" v-bind="activatorProps"> {{ auth.user.first_name }} {{ auth.user.last_name }}
       </v-btn>
     </template>
     <v-card>
@@ -21,21 +76,18 @@
             <v-col cols="2" sm="8">
               <v-row>
                 <v-col cols="12">
-                  <v-text-field label="Name: " :model-value="user.first_name + ' ' + user.last_name" readonly
-                    disabled></v-text-field>
-                  <v-text-field label="Phone number" :model-value="user.phone_number" readonly disabled></v-text-field>
-                  <v-text-field label="Address" :model-value="user.address" readonly disabled></v-text-field>
+                  <v-text-field label="Name: " :model-value="auth.user.first_name + ' ' + auth.user.last_name" readonly
+                                disabled></v-text-field>
+                  <v-text-field label="Phone number" :model-value="auth.user.phone_number" readonly disabled></v-text-field>
+                  <v-text-field label="Address" :model-value="auth.user.address" readonly disabled></v-text-field>
 
                 </v-col>
               </v-row>
               <v-row>
                 <v-col cols="12">
-                  <v-text-field label="Email" :model-value="user.email" readonly disabled></v-text-field>
-                  <v-text-field label="Marketing preferences" :model-value="user.is_marketing == false ? 'No' : 'Yes'"
-                    readonly disabled></v-text-field>
-
-                  <span>Email: {{ user.email }}</span>
-                  <span>Marketing preferences: </span>
+                  <v-text-field label="Email" :model-value="auth.user.email" readonly disabled></v-text-field>
+                  <v-text-field label="Marketing preferences" :model-value="!auth.user.is_marketing ? 'No' : 'Yes'"
+                                readonly disabled></v-text-field>
                 </v-col>
               </v-row>
             </v-col>
@@ -60,72 +112,6 @@
     </v-card>
   </v-dialog>
 </template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import axios from "axios";
-import { useAuthStore } from "@/stores/auth";
-import authPlugin from "@/plugins/authPlugin";
-import { User } from '@/interfaces/user';
-
-export default defineComponent({
-  name: 'UserInfo',
-  setup() {
-    const dialog = ref(false);
-    const orders = ref([]);
-
-    const user = useAuthStore().user;
-
-    const headers = [
-      { text: 'Order UUID', value: 'uuid' },
-      { text: 'Status', value: 'status' },
-      { text: 'Download invoice', value: 'download' }
-    ];
-    const fetchOrders = async () => {
-      try {
-        const response = await axios.get('/api/v1/user/orders', {
-          withCredentials: true,
-          headers: {
-            'Authorization': 'Bearer ' + useAuthStore().token
-          }
-        });
-        return response.data.data
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    onMounted(async () => {
-      orders.value = await fetchOrders();
-    });
-
-    const getStatusColor = (status: string) => {
-      switch (status) {
-        case 'Open':
-          return 'blue';
-        case 'Pending payment':
-          return 'orange';
-        case 'Paid':
-          return 'green';
-        case 'Shipped':
-          return 'teal';
-        case 'Cancelled':
-          return 'grey';
-        default:
-          return 'grey';
-      }
-    };
-
-    return {
-      dialog,
-      user,
-      headers,
-      orders,
-      getStatusColor
-    };
-  }
-});
-</script>
 
 <style scoped>
 .headline {

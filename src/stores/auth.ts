@@ -5,11 +5,11 @@ import { User } from "@/interfaces/user";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: {} as User,
+    user: null as User | null,
     showLoginModal: false,
     error: null,
     errors: [],
-    token: Cookie.get("jwt"),
+    token: Cookie.get("jwt") == undefined ? null : Cookie.get("jwt"),
   }),
   getters: {
     isAuthenticated: (state) => !!state.user,
@@ -39,7 +39,7 @@ export const useAuthStore = defineStore("auth", {
         const response = await axios.get("/api/v1/user", {
           withCredentials: true,
         });
-        this.user = response.data;
+        this.user = response.data.data as User;
         this.error = null;
       } catch (error: any) {
         this.user = {} as User;
@@ -49,15 +49,20 @@ export const useAuthStore = defineStore("auth", {
     async logout() {
       try {
         await axios.post("/api/v1/user/logout", {}, { withCredentials: true });
-        this.user = {} as User;
+        this.user = null
+        this.token = null;
         this.error = null;
       } catch (error: any) {
         this.error = error.response?.data?.error || "Failed to logout";
       }
     },
     async checkAuth() {
-      this.token = Cookie.get("jwt");
-      await this.fetchUser();
+      this.token = Cookie.get("jwt") == undefined ? null : Cookie.get("jwt");
+      console.log(this.token);
+      if (this.token != null) {
+        await this.fetchUser();
+      }
+
       if (!this.user) {
         this.showLoginModal = true;
       }
