@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import {ref} from 'vue'
+import {useAuthStore} from '@/stores/auth'
 import axios from "axios";
 
 const form = reactive({
@@ -35,71 +35,60 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <v-card>
-    <v-card-title>
-      <h2>Register</h2>
-    </v-card-title>
-    <v-form @submit.prevent="handleSubmit">
-      <v-text-field
-        v-model="form.first_name"
-        label="First Name"
-        prepend-icon="mdi-account"
-        :error-messages="errors.first_name"
-        required
-      ></v-text-field>
-      <v-text-field
-        v-model="form.last_name"
-        label="Last Name"
-        prepend-icon="mdi-account"
-        :error-messages="errors.last_name"
-        required
-      ></v-text-field>
-      <v-text-field
-        v-model="form.email"
-        label="Email"
-        prepend-icon="mdi-email"
-        type="email"
-        :error-messages="errors.email"
-        required
-      ></v-text-field>
-      <v-text-field
-        v-model="form.password"
-        label="Password"
-        prepend-icon="mdi-lock"
-        :type="showPassword ? 'text' : 'password'"
-        :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-        @click:append-inner="showPassword = !showPassword"
-        :error-messages="errors.password"
-        required
-      ></v-text-field>
-      <v-text-field
-        v-model="form.password_confirmation"
-        label="Confirm Password"
-        prepend-icon="mdi-lock"
-        :type="showPassword ? 'text' : 'password'"
-        :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-        @click:append-inner="showPassword = !showPassword"
-        :error-messages="errors.password_confirmation"
-        required
-      ></v-text-field>
-      <v-btn
-        type="submit"
-        color="primary"
-        block
-        large
-        class="mt-4"
-        :loading="loading"
-      >
-        Register
-      </v-btn>
-    </v-form>
-    <v-card-actions class="mt-4">
-      <v-btn variant="text" color="primary">Forgot Password?</v-btn>
-      <v-spacer></v-spacer>
-      <v-btn variant="text" color="primary">Create an Account</v-btn>
-    </v-card-actions>
-  </v-card>
-
+  <v-form @submit.prevent="handleSubmit">
+    <v-text-field
+      v-model="form.first_name"
+      label="First Name"
+      prepend-icon="mdi-account"
+      :error-messages="errors.first_name"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.last_name"
+      label="Last Name"
+      prepend-icon="mdi-account"
+      :error-messages="errors.last_name"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.email"
+      label="Email"
+      prepend-icon="mdi-email"
+      type="email"
+      :error-messages="errors.email"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.password"
+      label="Password"
+      prepend-icon="mdi-lock"
+      :type="showPassword ? 'text' : 'password'"
+      :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+      @click:append-inner="showPassword = !showPassword"
+      :error-messages="errors.password"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.password_confirmation"
+      label="Confirm Password"
+      prepend-icon="mdi-lock"
+      :type="showPassword ? 'text' : 'password'"
+      :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+      @click:append-inner="showPassword = !showPassword"
+      :error-messages="errors.password_confirmation"
+      required
+    ></v-text-field>
+    <v-btn
+      type="submit"
+      color="primary"
+      block
+      large
+      class="mt-4"
+      :loading="loading"
+    >
+      Register
+    </v-btn>
+  </v-form>
 </template>
 
 <style scoped lang="sass">

@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./components/AppFooter.vue')['default']
+    ForgotPaasword: typeof import('./components/ForgotPaasword.vue')['default']
+    ForgotPasswordForm: typeof import('./components/ForgotPasswordForm.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     LoginForm: typeof import('./components/LoginForm.vue')['default']
     RegisterForm: typeof import('./components/RegisterForm.vue')['default']
