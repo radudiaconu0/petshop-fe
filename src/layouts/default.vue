@@ -82,7 +82,9 @@ onMounted(async () => {
             </v-card-text>
           </v-card>
         </v-dialog>
-        <v-btn @click="dialog = true">Open Dialog</v-btn>
+        <v-btn @click="dialog = true">
+          {{ auth.user ? auth.user.first_name : 'Login' }}
+        </v-btn>
 
       </div>
       <UserInfo v-else></UserInfo>

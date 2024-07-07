@@ -8,4 +8,5 @@ export interface User {
     address: string;
     phone_number: string;
     is_marketing: boolean;
+    created_at: string;
 }
