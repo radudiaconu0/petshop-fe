@@ -5,7 +5,14 @@ import axios from 'axios';
 import {Order} from "@/interfaces/order";
 import {Response} from "@/interfaces/response";
 import {useCurrencyConverter} from "@/composables/useCurrencyConverter";
+import {definePage} from "unplugin-vue-router/runtime";
 
+definePage({
+  alias: '/orders/:uuid',
+  meta: {
+    requiresAuth: true,
+  },
+})
 const loading = ref(false);
 const order = ref<Order | null>(null);
 const error = ref<string | null>(null);
@@ -50,7 +57,8 @@ const goBack = () => {
     <v-row justify="center">
       <v-col cols="12" md="8">
         <v-select
-          :items="['CNY', 'USD', 'EUR']" v-model="currentCurrency" @change="changeCurrency">Currency</v-select>
+          :items="['CNY', 'USD', 'EUR']" v-model="currentCurrency" @change="changeCurrency">Currency
+        </v-select>
         <v-card v-if="order">
           <v-card-title>
             Order Details
@@ -67,7 +75,10 @@ const goBack = () => {
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-title><strong>Delivery Fee:</strong></v-list-item-title>
-                  <v-list-item-subtitle>{{ convertToCurrency(order.delivery_fee, currentCurrency) }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>{{
+                      convertToCurrency(order.delivery_fee, currentCurrency)
+                    }}
+                  </v-list-item-subtitle>
                 </v-list-item>
                 <v-list-item>
                   <v-list-item-title><strong>Billing Address:</strong></v-list-item-title>

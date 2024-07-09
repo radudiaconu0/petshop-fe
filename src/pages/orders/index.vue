@@ -18,40 +18,41 @@
   </v-container>
 </template>
 
-<script>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+<script setup lang="ts">
+import {ref, onMounted} from 'vue';
+import {useRouter} from 'vue-router';
 import axios from "axios";
+import {definePage} from "unplugin-vue-router/runtime";
 
-export default {
-  setup() {
-    const orders = ref([]);
-    const router = useRouter();
-
-    onMounted(async () => {
-      // Fetch the orders from your API
-      const response = await axios.get('/api/v1/user/orders');
-      orders.value = response.data.data;
-    });
-
-    const getOrderStatus = (order) => {
-      if (order.order_status.length > 0) {
-        return order.order_status[order.order_status.length - 1].title;
-      }
-      return 'Unknown';
-    };
-
-    const navigateToOrderDetails = (orderId) => {
-      router.push(`/orders/${orderId}`);
-    };
-
-    return {
-      orders,
-      getOrderStatus,
-      navigateToOrderDetails,
-    };
+definePage({
+  alias: '/orders',
+  meta: {
+    requiresAuth: true,
   },
+})
+
+
+const orders = ref([]);
+const router = useRouter();
+
+onMounted(async () => {
+  // Fetch the orders from your API
+  const response = await axios.get('/api/v1/user/orders');
+  orders.value = response.data.data;
+});
+
+const getOrderStatus = (order) => {
+  if (order.order_status.length > 0) {
+    return order.order_status[order.order_status.length - 1].title;
+  }
+  return 'Unknown';
 };
+
+const navigateToOrderDetails = (orderId) => {
+  router.push(`/orders/${orderId}`);
+};
+
+
 </script>
 
 <style scoped>

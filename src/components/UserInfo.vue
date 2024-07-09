@@ -241,6 +241,7 @@ const getStatusColor = (status: string) => {
           </v-form>
 
           <v-divider class="my-4"></v-divider>
+          <v-btn color="primary" to="/orders">View All Orders</v-btn>
 
           <v-data-table
             :headers="headers"
