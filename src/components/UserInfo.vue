@@ -80,6 +80,7 @@ const logout = () => {
 
 const saveUser = async () => {
   try {
+    loading.value.save = true;
     if (avatar.value) {
 
       const form = new FormData();
@@ -97,11 +98,13 @@ const saveUser = async () => {
   catch (e) {
     errors.value = e.response.data.errors;
   }
+  finally {
+    loading.value.save = false;
+  }
 };
 
 
 const getStatusColor = (status: string) => {
-  console.log(status);
   switch (status) {
     case 'open':
       return 'blue';
@@ -235,7 +238,7 @@ const getStatusColor = (status: string) => {
 
             <v-row>
               <v-col class="d-flex justify-end">
-                <v-btn color="primary" type="submit">Save</v-btn>
+                <v-btn color="primary" type="submit" :loading="loading.save">Save</v-btn>
               </v-col>
             </v-row>
           </v-form>
