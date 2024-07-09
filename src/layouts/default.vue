@@ -4,16 +4,18 @@ import axios from "axios";
 import UserInfo from "@/components/UserInfo.vue";
 import LoginForm from "@/components/LoginForm.vue";
 import ForgotPasswordForm from "@/components/ForgotPasswordForm.vue";
+import {Category} from "@/interfaces/category";
 
 const auth = useAuthStore();
-const categories = ref([]);
+const categories = ref<Category[]>([]);
 const currentForm = ref('login');
 const dialog = ref(false);
+
 
 onMounted(async () => {
   try {
     const response = await axios.get('/api/v1/categories');
-    categories.value = response.data;
+    categories.value = response.data.data;
   } catch (e) {
     console.error(e);
   }
@@ -25,20 +27,20 @@ onMounted(async () => {
     <v-app-bar :elevation="2">
       <v-spacer></v-spacer>
       <div class="text-center">
-        <v-btn id="menu-activator" color="primary">
-          Products
+        <v-btn id="menu-activator">
+          Products <v-icon right>mdi-chevron-down</v-icon>
         </v-btn>
 
         <v-menu activator="#menu-activator">
           <v-list>
-            <v-list-item v-for="(category, index) in categories" :key="category.uid" :value="index">
+            <v-list-item v-for="(category, index) in categories" :key="category.uuid" :value="index">
               <v-list-item-title>{{ category.title }}</v-list-item-title>
             </v-list-item>
           </v-list>
         </v-menu>
       </div>
       <v-btn>Promotions</v-btn>
-      <v-btn to="blog">Blog</v-btn>
+      <v-btn to="/blog">Blog</v-btn>
       <v-spacer/>
       <v-btn variant="outlined" rounded>
         <v-icon left>mdi-cart</v-icon>
@@ -83,7 +85,7 @@ onMounted(async () => {
           </v-card>
         </v-dialog>
         <v-btn @click="dialog = true">
-          {{ auth.user ? auth.user.first_name : 'Login' }}
+          Login
         </v-btn>
 
       </div>

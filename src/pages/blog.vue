@@ -1,27 +1,16 @@
 <script setup lang="ts">
 import InfiniteLoading from "v3-infinite-loading";
 
-interface Post {
-  id: string,
-  uuid: string,
-  title: string,
-  slug: string,
-  content: string,
-  metadata: string,
-  created_at: string,
-  updated_at: string
-}
-
 import axios from "axios";
+import {PaginatedResponse} from "@/interfaces/response";
+import {Post} from "@/interfaces/blog";
 
-let page = 1;
+const page = ref(1);
 
 const posts = ref<Post[]>([])
-const loadPosts = async $state => {
-
+const loadPosts = async($state: any)=> {
   try {
-    const response = await axios.get('/api/v1/main/blog?page=' + page);
-    console.log(response.data.data.length)
+    const response = await axios.get<PaginatedResponse<Post>>('/api/v1/main/blog?page=' + page.value);
     if (response.data.data.length < 10) {
       $state.complete()
     }
@@ -29,10 +18,14 @@ const loadPosts = async $state => {
       posts.value.push(...response.data.data)
       $state.loaded();
     }
-    page++
+    page.value++;
   } catch (e) {
     $state.error();
   }
+}
+
+const getImageUrl = (image: string) => {
+  return 'https://pet-shop.buckhill.com.hr/api/v1/file/' + image
 }
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString()
@@ -41,10 +34,10 @@ const formatDate = (date: string) => {
 const share = () => {
   console.log('Share')
 }
+
 </script>
 
 <template>
-
     <template v-for="post in posts" :key="post.uuid">
       <v-card class="mx-auto my-4" max-width="900" elevation="3">
         <v-card-title class="text-h5 font-weight-bold">
@@ -56,9 +49,10 @@ const share = () => {
         </v-card-subtitle>
 
         <v-card-text>
+          <v-img :src="getImageUrl(post.metadata.image)" aspect-ratio="16/9"></v-img>
           <div class="text-body-1 mb-2">{{ post.content }}</div>
-          <v-chip v-if="post.metadata" small color="primary" class="mr-2">
-            {{ post.metadata }}
+          <v-chip v-if="post.metadata.author" class="mr-2" color="primary" label>
+            {{ post.metadata.author }}
           </v-chip>
         </v-card-text>
 

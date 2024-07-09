@@ -9,4 +9,5 @@ export interface User {
     phone_number: string;
     is_marketing: boolean;
     created_at: string;
+    updated_at: string;
 }

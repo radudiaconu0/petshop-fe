@@ -6,7 +6,7 @@ import Cookie from 'js-cookie'
 export default {
   install: (app: App) => {
     const authStore = useAuthStore()
-    axios.defaults.baseURL = 'http://localhost:8000'
+    axios.defaults.baseURL = 'https://pet-shop.buckhill.com.hr/'
     // Add axios interceptor for adding token to requests
     axios.interceptors.request.use(config => {
       const token = authStore.token || Cookie.get('jwt')

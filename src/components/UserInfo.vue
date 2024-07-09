@@ -2,12 +2,20 @@
 import {ref} from 'vue';
 import axios from "axios";
 import {useAuthStore} from "@/stores/auth";
+import {PaginatedResponse} from "@/interfaces/response";
+import {Order} from "@/interfaces/order";
+import {getImageUrl} from "@/helpers";
 
 const dialog = ref(false);
-const orders = ref([]);
-const loading = ref(false);
+const orders = ref<Order[]>([]);
+const loading = ref({
+  save: false,
+  orders: false
+})
 
 const auth = useAuthStore();
+
+const avatar = ref(null);
 
 const formData = ref({
   first_name: auth.user?.first_name,
@@ -32,25 +40,39 @@ const errors = ref({
 });
 
 const headers = [
-  {text: 'Order UUID', value: 'uuid'},
-  {text: 'Status', value: 'status'},
-  {text: 'Download invoice', value: 'download'}
+  {title: 'Order UUID', key: 'uuid'},
+  {title: 'Status', key: 'status'},
+  {title: 'Download invoice', key: 'download'}
 ];
-const fetchOrders = async () => {
+const fetchOrders = async ({page, itemsPerPage, sortBy}) => {
   try {
-    const response = await axios.get('/api/v1/user/orders', {
-      withCredentials: true,
+    loading.value.orders = true;
+    const response = await axios.get<PaginatedResponse<Order>>('/api/v1/user/orders', {
+      params: {
+        page,
+        limit: itemsPerPage,
+        sortBy
+      }
     });
-    return response.data.data.data
+    orders.value = response.data.data;
   } catch (e) {
     console.error(e);
-    return []
+  }
+  finally {
+    loading.value.orders = false;
   }
 };
 
-onMounted(async () => {
-  orders.value = await fetchOrders();
-});
+const downloadInvoice = (uuid: string) => {
+  axios.get(`/api/v1/order/${uuid}/download`, {responseType: 'blob'}).then(response => {
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `order_${uuid}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+  });
+};
 
 const logout = () => {
   auth.logout()
@@ -58,9 +80,18 @@ const logout = () => {
 
 const saveUser = async () => {
   try {
-    const response = await axios.put('/api/v1/user/edit', formData.value, {
-      withCredentials: true,
-    });
+    if (avatar.value) {
+
+      const form = new FormData();
+      form.append('file', avatar.value);
+      const response = await axios.post('/api/v1/file/upload', form, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      formData.value.avatar = response.data.data.uuid;
+    }
+    const response = await axios.put('/api/v1/user/edit', formData.value);
     auth.user = response.data.data;
   }
   catch (e) {
@@ -68,17 +99,19 @@ const saveUser = async () => {
   }
 };
 
+
 const getStatusColor = (status: string) => {
+  console.log(status);
   switch (status) {
-    case 'Open':
+    case 'open':
       return 'blue';
-    case 'Pending payment':
+    case 'pending payment':
       return 'orange';
-    case 'Paid':
+    case 'paid':
       return 'green';
-    case 'Shipped':
+    case 'shipped':
       return 'teal';
-    case 'Cancelled':
+    case 'cancelled':
       return 'grey';
     default:
       return 'grey';
@@ -91,7 +124,10 @@ const getStatusColor = (status: string) => {
 
     <template v-slot:activator="{ props: activatorProps }">
       <v-btn variant="outlined" class="ml-2" @click="logout"> Logout</v-btn>
-      <v-btn variant="outlined" class="ml-2" v-bind="activatorProps"> {{ auth.user?.first_name }} {{ auth.user.last_name }}
+      <v-btn class="ml-2" v-bind="activatorProps" variant="flat" icon>
+        <v-avatar>
+          <v-img :src="getImageUrl(auth.user.avatar)" alt="avatar"> </v-img>
+        </v-avatar>
       </v-btn>
     </template>
     <v-card>
@@ -103,13 +139,17 @@ const getStatusColor = (status: string) => {
         <v-container>
           <v-form @submit.prevent="saveUser">
             <v-row>
-              <v-col cols="12" sm="4" class="d-flex flex-column align-center">
-                <v-avatar v-if="auth.user?.avatar" size="100">
-                  <v-img :src="auth.user.avatar"></v-img>
+              <v-col cols="6" sm="4" class="d-flex flex-column align-center">
+                <v-avatar v-if="auth.user?.avatar" size="200">
+                  <v-img :src="getImageUrl(auth.user.avatar)" alt="avatar"></v-img>
                 </v-avatar>
-                <v-file-input v-model="formData.avatar" label="Avatar" accept="image/*"></v-file-input>
-              </v-col>
+                <v-avatar v-else size="200">
+                  <v-img :src="'https://ui-avatars.com/api/?name=' + auth.user?.first_name +' '+ auth.user?.last_name "
+                         alt="avatar"></v-img>
+                </v-avatar>
+                <v-file-input v-model="avatar" label="Avatar" accept="image/*"></v-file-input>
 
+              </v-col>
               <v-col cols="12" sm="8">
                 <v-row>
                   <v-col cols="6">
@@ -202,14 +242,25 @@ const getStatusColor = (status: string) => {
 
           <v-divider class="my-4"></v-divider>
 
-          <v-data-table :headers="headers" :items="orders" class="elevation-1">
-            <template v-slot:item.status="{ item }">
-              <v-chip rounded :color="getStatusColor(item.status)" dark>{{ item.status }}</v-chip>
-            </template>
-            <template v-slot:item.download="{ item }">
-              <v-btn icon>
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
+          <v-data-table
+            :headers="headers"
+            :items="orders"
+            :loading="loading.orders"
+            :items-per-page="5"
+            @update:options="fetchOrders"
+            class="elevation-1">
+            <template v-slot:item="{ item }">
+              <tr>
+                <td>{{ item.uuid }}</td>
+                <td>
+                  <v-chip rounded :color="getStatusColor(item.order_status[0].title)">
+                    {{ item.order_status[0].title }}
+                  </v-chip>
+                </td>
+                <td>
+                  <v-btn color="primary" text @click="downloadInvoice(item.uuid)">Download</v-btn>
+                </td>
+              </tr>
             </template>
           </v-data-table>
         </v-container>

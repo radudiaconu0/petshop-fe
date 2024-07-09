@@ -11,7 +11,7 @@ const errors = ref({
 
 const handleSubmit = async () => {
   try {
-    const response = await axios.post('/api/v1/forgot-password', {email: email.value})
+    const response = await axios.post('/api/v1/user/forgot-password', {email: email.value})
     const reset_token = response.data.data.reset_token
     link.value = `${window.location.origin}/reset-password?token=${reset_token}`
   } catch (e) {

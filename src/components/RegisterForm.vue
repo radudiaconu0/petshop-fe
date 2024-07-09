@@ -1,23 +1,27 @@
 <script setup lang="ts">
 
 import {ref} from 'vue'
-import {useAuthStore} from '@/stores/auth'
+import {useAuthStore} from '../stores/auth'
 import axios from "axios";
 
-const form = reactive({
+const form = ref({
   first_name: '',
   last_name: '',
+  address: '',
   email: '',
   password: '',
-  password_confirmation: ''
+  password_confirmation: '',
+  phone_number: ''
 })
 
 const errors = ref({
   first_name: [],
   last_name: [],
+  address: [],
   email: [],
   password: [],
-  password_confirmation: []
+  password_confirmation: [],
+  phone_number: []
 })
 const auth = useAuthStore()
 
@@ -26,7 +30,7 @@ const loading = ref(false)
 const handleSubmit = async () => {
   try {
     await axios.post('/api/v1/user/create', form)
-    await auth.login(form.email, form.password)
+    await auth.login(form.value.email, form.value.password)
   } catch (e) {
     errors.value = e.response.data.errors
   }
@@ -56,6 +60,20 @@ const handleSubmit = async () => {
       prepend-icon="mdi-email"
       type="email"
       :error-messages="errors.email"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.address"
+      label="Address"
+      prepend-icon="mdi-account"
+      :error-messages="errors.address"
+      required
+    ></v-text-field>
+    <v-text-field
+      v-model="form.phone_number"
+      label="Phone number"
+      prepend-icon="mdi-account"
+      :error-messages="errors.phone_number"
       required
     ></v-text-field>
     <v-text-field

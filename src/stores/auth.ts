@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import Cookie from "js-cookie";
 import { User } from "@/interfaces/user";
+import {LoginResponse, Response} from "@/interfaces/response";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -9,7 +9,7 @@ export const useAuthStore = defineStore("auth", {
     showLoginModal: false,
     error: null,
     errors: [],
-    token: Cookie.get("jwt") == undefined ? null : Cookie.get("jwt"),
+    token: localStorage.getItem("jwt") || null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.user,
@@ -17,12 +17,12 @@ export const useAuthStore = defineStore("auth", {
   actions: {
     async login(email: string, password: string) {
       try {
-        const response = await axios.post(
-          "/api/v1/login",
+        const response = await axios.post<Response<LoginResponse>>(
+          "/api/v1/user/login",
           { email, password },
-          { withCredentials: true }
         );
-        this.token = response.data.token;
+        this.token = response.data.data.token;
+        localStorage.setItem("jwt", this.token);
         await this.fetchUser();
         this.showLoginModal = false;
         this.error = null;
@@ -36,9 +36,7 @@ export const useAuthStore = defineStore("auth", {
     },
     async fetchUser() {
       try {
-        const response = await axios.get("/api/v1/user", {
-          withCredentials: true,
-        });
+        const response = await axios.get("/api/v1/user");
         this.user = response.data.data as User;
         this.error = null;
       } catch (error: any) {
@@ -48,7 +46,8 @@ export const useAuthStore = defineStore("auth", {
     },
     async logout() {
       try {
-        await axios.post("/api/v1/user/logout", {}, { withCredentials: true });
+        await axios.get("/api/v1/user/logout", {});
+        localStorage.removeItem("jwt");
         this.user = null
         this.token = null;
         this.error = null;
@@ -57,7 +56,7 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async checkAuth() {
-      this.token = Cookie.get("jwt") == undefined ? null : Cookie.get("jwt");
+      this.token = localStorage.getItem("jwt");
       console.log(this.token);
       if (this.token != null) {
         await this.fetchUser();
